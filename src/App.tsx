@@ -9,6 +9,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { IoPhonePortrait } from "react-icons/io5";
 import { HiSparkles } from "react-icons/hi2";
 import { IoGameController } from "react-icons/io5";
@@ -34,9 +35,9 @@ function ProjectCard({
       bgGradient={gradient}
       rounded="3xl"
       p={8}
-      shadow="xl"
+      shadow="md"
       transition="all 0.3s"
-      _hover={{ transform: "translateY(-8px)", shadow: "2xl" }}
+      _hover={{ transform: "translateY(-8px)", shadow: "lg" }}
       position="relative"
       overflow="hidden"
     >
@@ -67,6 +68,8 @@ function ProjectCard({
 }
 
 function App() {
+  const [showWebsite, setShowWebsite] = useState(false);
+
   return (
     <Box minH="100vh" bg="white" position="relative" overflow="hidden">
       {/* Animated background gradients */}
@@ -76,7 +79,7 @@ function App() {
         left="0"
         right="0"
         height="100%"
-        bgGradient="linear(to-br, #FFF8E7, #FFF4D6, #FFFAED)"
+        bgGradient="linear-gradient(to bottom right, #FFF8E7, #FFF4D6, #FFFAED)"
         opacity={0.8}
         pointerEvents="none"
       />
@@ -86,7 +89,7 @@ function App() {
         left="5%"
         width="400px"
         height="400px"
-        bgGradient="radial(circle, #E2852E, transparent)"
+        bgGradient="radial-gradient(circle, #E2852E, transparent)"
         opacity={0.12}
         rounded="full"
         filter="blur(60px)"
@@ -99,7 +102,7 @@ function App() {
         right="10%"
         width="500px"
         height="500px"
-        bgGradient="radial(circle, #ABE0F0, transparent)"
+        bgGradient="radial-gradient(circle, #ABE0F0, transparent)"
         opacity={0.18}
         rounded="full"
         filter="blur(80px)"
@@ -112,7 +115,7 @@ function App() {
         left="20%"
         width="450px"
         height="450px"
-        bgGradient="radial(circle, #F5C857, transparent)"
+        bgGradient="radial-gradient(circle, #F5C857, transparent)"
         opacity={0.15}
         rounded="full"
         filter="blur(70px)"
@@ -132,6 +135,11 @@ function App() {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-12px); }
           }
+
+          @keyframes pulse {
+            0%, 100% { transform: rotate(3deg) scale(1); }
+            50% { transform: rotate(3deg) scale(1.05); }
+          }
         `}
       </style>
 
@@ -143,7 +151,7 @@ function App() {
           pt={{ base: 12, md: 20 }}
           pb={{ base: 16, md: 24 }}
         >
-          <VStack spacing={8} align="center" textAlign="center">
+          <VStack gap={8} align="center" textAlign="center">
             {/* Logo */}
             <Box
               animation="bounce 3s ease-in-out infinite"
@@ -161,12 +169,12 @@ function App() {
             </Box>
 
             {/* Main Headline */}
-            <VStack spacing={4} maxW="4xl">
+            <VStack gap={4} maxW="4xl">
               <Heading
                 as="h1"
                 fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }}
                 fontWeight="900"
-                bgGradient="linear(to-r, #E2852E, #F5C857, #ABE0F0)"
+                bgGradient="linear-gradient(to right, #E2852E, #F5C857, #ABE0F0)"
                 bgClip="text"
                 lineHeight="1.1"
                 letterSpacing="-0.03em"
@@ -190,13 +198,15 @@ function App() {
 
         {/* Projects Section */}
         <Container maxW="6xl" py={{ base: 12, md: 16 }}>
-          <VStack spacing={12}>
-            <VStack spacing={3} textAlign="center">
+          <VStack gap={12}>
+            <VStack gap={3} textAlign="center">
               <Heading
                 fontSize={{ base: "3xl", md: "5xl" }}
                 fontWeight="800"
-                bgGradient="linear(to-r, #E2852E, #ABE0F0)"
+                bgGradient="linear-gradient(to right, #E2852E, #ABE0F0)"
                 bgClip="text"
+                lineHeight="1.2"
+                pt={1}
               >
                 What we’re building
               </Heading>
@@ -211,7 +221,7 @@ function App() {
 
             <SimpleGrid
               columns={{ base: 1, md: 2, lg: 3 }}
-              spacing={8}
+              gap={8}
               w="full"
             >
               <ProjectCard
@@ -219,21 +229,21 @@ function App() {
                 title="Mobile Apps"
                 subtitle="iOS & Android"
                 description="Zero-lag, pixel-perfect natives. The kind you keep on the home screen."
-                gradient="linear(135deg, #E2852E 0%, #F5C857 100%)"
+                gradient="linear-gradient(135deg, #E2852E 0%, #F5C857 100%)"
               />
               <ProjectCard
                 icon={HiSparkles}
                 title="AI Agents"
                 subtitle="Web"
                 description="Agents that earn the right to be called “smart”. No prompt-engineering PhD required."
-                gradient="linear(135deg, #ABE0F0 0%, #7BC8DA 100%)"
+                gradient="linear-gradient(135deg, #ABE0F0 0%, #7BC8DA 100%)"
               />
               <ProjectCard
                 icon={IoGameController}
                 title="Games"
                 subtitle="Steam"
                 description="Boss fights and late-night “one more run”. Coming soon."
-                gradient="linear(135deg, #F5C857 0%, #FFEE91 100%)"
+                gradient="linear-gradient(135deg, #F5C857 0%, #FFEE91 100%)"
               />
             </SimpleGrid>
           </VStack>
@@ -245,33 +255,104 @@ function App() {
             bg="white"
             rounded="3xl"
             p={{ base: 8, md: 12 }}
-            shadow="2xl"
+            shadow="xs"
             borderWidth="1px"
             borderColor="gray.100"
+            cursor="pointer"
+            onClick={() => setShowWebsite((prev) => !prev)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={showWebsite}
+            aria-label="Toggle personal website"
+            perspective="1200px"
           >
-            <VStack spacing={6} align="start">
-              <Heading
-                fontSize={{ base: "2xl", md: "3xl" }}
-                fontWeight="800"
-                bgGradient="linear(to-r, #E2852E, #F5C857)"
-                bgClip="text"
+            <Box
+              position="relative"
+              minH={{ base: "260px", md: "220px" }}
+              transformStyle="preserve-3d"
+              transition="transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+              transform={showWebsite ? "rotateY(180deg)" : "rotateY(0deg)"}
+            >
+              <Box position="absolute" inset="0" backfaceVisibility="hidden">
+                <VStack gap={6} align="start">
+                  <Heading
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    fontWeight="800"
+                    bgGradient="linear-gradient(to right, #E2852E, #F5C857)"
+                    bgClip="text"
+                  >
+                    Built after hours, launched before Monday.
+                  </Heading>
+                  <Stack
+                    gap={4}
+                    fontSize={{ base: "md", md: "lg" }}
+                    color="gray.700"
+                    lineHeight="1.8"
+                  >
+                    <Text>
+                      I’m Wayne Z—full-time engineer, overtime founder.
+                      TasteMates Labs is a one-person studio that treats nights
+                      and weekends like a launch window. Ship, learn, iterate,
+                      repeat.
+                    </Text>
+                    <Text>Check back; the changelog never sleeps.</Text>
+                  </Stack>
+                </VStack>
+              </Box>
+              <Box
+                position="absolute"
+                inset="0"
+                backfaceVisibility="hidden"
+                transform="rotateY(180deg)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                bg="orange.50"
+                rounded="2xl"
+                borderWidth="1px"
+                borderColor="orange.100"
               >
-                Built after hours, launched before Monday.
-              </Heading>
-              <Stack
-                spacing={4}
-                fontSize={{ base: "md", md: "lg" }}
-                color="gray.700"
-                lineHeight="1.8"
+                <VStack gap={3} textAlign="center">
+                  <Text
+                    fontSize="sm"
+                    color="orange.700"
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    fontWeight="700"
+                  >
+                    Personal Website
+                  </Text>
+                  <Text
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    fontWeight="800"
+                    color="orange.900"
+                    fontFamily="'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+                  >
+                    jwaynez.com
+                  </Text>
+                </VStack>
+              </Box>
+              <Box
+                position="absolute"
+                top={{ base: 4, md: 5 }}
+                right={{ base: 4, md: 5 }}
+                px={3}
+                py={1}
+                bg="orange.400"
+                color="white"
+                fontSize="xs"
+                fontWeight="700"
+                textTransform="uppercase"
+                letterSpacing="0.06em"
+                rounded="full"
+                shadow="md"
+                transform="rotate(3deg)"
+                backfaceVisibility="hidden"
+                animation="pulse 2.4s ease-in-out infinite"
               >
-                <Text>
-                  I’m Wayne Z—full-time engineer, overtime founder. TasteMates
-                  Labs is a one-person studio that treats nights and weekends
-                  like a launch window. Ship, learn, iterate, repeat.
-                </Text>
-                <Text>Check back; the changelog never sleeps.</Text>
-              </Stack>
-            </VStack>
+                Tap to flip
+              </Box>
+            </Box>
           </Box>
         </Container>
 
