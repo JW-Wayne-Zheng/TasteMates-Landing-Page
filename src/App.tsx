@@ -1,371 +1,432 @@
-import {
-  Box,
-  Container,
-  Heading,
-  Icon,
-  Image,
-  SimpleGrid,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import { useState } from "react";
-import { IoPhonePortrait } from "react-icons/io5";
-import { HiSparkles } from "react-icons/hi2";
-import { IoGameController } from "react-icons/io5";
-import type { IconType } from "react-icons";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { PRODUCTS, RELEASED, STORE_LABEL, type Product, type StoreLink } from "./products";
 
-type ProjectCardProps = {
-  icon: IconType;
-  title: string;
-  subtitle: string;
-  description: string;
-  gradient: string;
+const SUPPORT_EMAIL = "support@tastematesapp.com";
+
+/** Adds `is-visible` once the element scrolls into view, then stops watching. */
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  // Without IntersectionObserver there is nothing to wait for: show it at once.
+  const [visible, setVisible] = useState(() => !("IntersectionObserver" in window));
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return { ref, visible };
+}
+
+/** A store badge-style link, or a plain note when the store isn't live yet. */
+function StoreAction({ link, tone }: { link: StoreLink; tone: "light" | "dark" }) {
+  const where = STORE_LABEL[link.store];
+  if ("comingSoon" in link) {
+    return <span className={`soon soon-${tone}`}>Coming soon to {where}</span>;
+  }
+  const verb = link.store === "app-store" ? "Download on" : "Get it on";
+  return (
+    <a
+      className={`btn ${tone === "light" ? "btn-light" : "btn-dark"}`}
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {verb} {where}
+    </a>
+  );
+}
+
+type ThemeChoice = "system" | "light" | "dark";
+const THEME_ORDER: ThemeChoice[] = ["system", "light", "dark"];
+const THEME_LABEL: Record<ThemeChoice, string> = {
+  system: "Appearance: match system",
+  light: "Appearance: light",
+  dark: "Appearance: dark",
 };
 
-function ProjectCard({
-  icon,
-  title,
-  subtitle,
-  description,
-  gradient,
-}: ProjectCardProps) {
+function readTheme(): ThemeChoice {
+  try {
+    const t = localStorage.getItem("theme");
+    return t === "light" || t === "dark" ? t : "system";
+  } catch {
+    return "system";
+  }
+}
+
+/**
+ * Cycles system → light → dark. "System" follows the device setting, which is
+ * what most visitors want; the other two are an explicit override.
+ */
+function ThemeToggle() {
+  const [theme, setTheme] = useState<ThemeChoice>(readTheme);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "system") delete root.dataset.theme;
+    else root.dataset.theme = theme;
+    try {
+      if (theme === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", theme);
+    } catch {
+      // Storage can be blocked (private mode); the choice then lasts this visit.
+    }
+  }, [theme]);
+
+  const next = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
   return (
-    <Box
-      bgGradient={gradient}
-      rounded="3xl"
-      p={8}
-      shadow="md"
-      transition="all 0.3s"
-      _hover={{ transform: "translateY(-8px)", shadow: "lg" }}
-      position="relative"
-      overflow="hidden"
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={() => setTheme(next)}
+      aria-label={`${THEME_LABEL[theme]}. Switch to ${next}.`}
+      title={THEME_LABEL[theme]}
     >
-      <Box position="relative" zIndex={1}>
-        <Icon as={icon} boxSize={12} color="white" mb={4} />
-        <Heading size="lg" color="white" mb={1}>
-          {title}
-        </Heading>
-        <Text fontSize="sm" color="whiteAlpha.800" mb={3} fontWeight="600">
-          {subtitle}
-        </Text>
-        <Text color="whiteAlpha.900" fontSize="md">
-          {description}
-        </Text>
-      </Box>
-      <Box
-        position="absolute"
-        top="-20%"
-        right="-10%"
-        width="200px"
-        height="200px"
-        bg="whiteAlpha.200"
-        rounded="full"
-        filter="blur(40px)"
-      />
-    </Box>
+      {theme === "light" ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" />
+        </svg>
+      ) : theme === "dark" ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" />
+        </svg>
+      )}
+    </button>
   );
 }
 
-function App() {
-  const [showWebsite, setShowWebsite] = useState(false);
-
+function Nav() {
   return (
-    <Box minH="100vh" bg="white" position="relative" overflow="hidden">
-      {/* Animated background gradients */}
-      <Box
-        position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        height="100%"
-        bgGradient="linear-gradient(to bottom right, #FFF8E7, #FFF4D6, #FFFAED)"
-        opacity={0.8}
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute"
-        top="10%"
-        left="5%"
-        width="400px"
-        height="400px"
-        bgGradient="radial-gradient(circle, #E2852E, transparent)"
-        opacity={0.12}
-        rounded="full"
-        filter="blur(60px)"
-        animation="float 20s ease-in-out infinite"
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute"
-        top="40%"
-        right="10%"
-        width="500px"
-        height="500px"
-        bgGradient="radial-gradient(circle, #ABE0F0, transparent)"
-        opacity={0.18}
-        rounded="full"
-        filter="blur(80px)"
-        animation="float 25s ease-in-out infinite reverse"
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute"
-        bottom="10%"
-        left="20%"
-        width="450px"
-        height="450px"
-        bgGradient="radial-gradient(circle, #F5C857, transparent)"
-        opacity={0.15}
-        rounded="full"
-        filter="blur(70px)"
-        animation="float 22s ease-in-out infinite"
-        pointerEvents="none"
-      />
-
-      <style>
-        {`
-          @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-          }
-
-          @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
-          }
-
-          @keyframes pulse {
-            0%, 100% { transform: rotate(3deg) scale(1); }
-            50% { transform: rotate(3deg) scale(1.05); }
-          }
-        `}
-      </style>
-
-      {/* Content */}
-      <Box position="relative" zIndex={1}>
-        {/* Hero Section */}
-        <Container
-          maxW="6xl"
-          pt={{ base: 12, md: 20 }}
-          pb={{ base: 16, md: 24 }}
-        >
-          <VStack gap={8} align="center" textAlign="center">
-            {/* Logo */}
-            <Box
-              animation="bounce 3s ease-in-out infinite"
-              w={{ base: "70%", md: "50%", lg: "40%" }}
-              maxW="600px"
-            >
-              <Image
-                src="/TasteMatesLabsLogo.png"
-                alt="TasteMates Labs"
-                w="100%"
-                h="auto"
-                objectFit="contain"
-                filter="drop-shadow(0 10px 30px rgba(0,0,0,0.15))"
-              />
-            </Box>
-
-            {/* Main Headline */}
-            <VStack gap={4} maxW="4xl">
-              <Heading
-                as="h1"
-                fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }}
-                fontWeight="900"
-                bgGradient="linear-gradient(to right, #E2852E, #F5C857, #ABE0F0)"
-                bgClip="text"
-                lineHeight="1.1"
-                letterSpacing="-0.03em"
-              >
-                Joyful Experiences
-                <br />
-                Through Technology
-              </Heading>
-              <Text
-                fontSize={{ base: "lg", md: "2xl" }}
-                color="gray.700"
-                fontWeight="500"
-                maxW="3xl"
-                lineHeight="1.6"
-              >
-                We ship software people actually want to open twice.
-              </Text>
-            </VStack>
-          </VStack>
-        </Container>
-
-        {/* Projects Section */}
-        <Container maxW="6xl" py={{ base: 12, md: 16 }}>
-          <VStack gap={12}>
-            <VStack gap={3} textAlign="center">
-              <Heading
-                fontSize={{ base: "3xl", md: "5xl" }}
-                fontWeight="800"
-                bgGradient="linear-gradient(to right, #E2852E, #ABE0F0)"
-                bgClip="text"
-                lineHeight="1.2"
-                pt={1}
-              >
-                What we’re building
-              </Heading>
-              <Text
-                fontSize={{ base: "md", md: "lg" }}
-                color="gray.600"
-                maxW="2xl"
-              >
-                No vaporware—just live code and shipping dates.
-              </Text>
-            </VStack>
-
-            <SimpleGrid
-              columns={{ base: 1, md: 2, lg: 3 }}
-              gap={8}
-              w="full"
-            >
-              <ProjectCard
-                icon={IoPhonePortrait}
-                title="Mobile Apps"
-                subtitle="iOS & Android"
-                description="Zero-lag, pixel-perfect natives. The kind you keep on the home screen."
-                gradient="linear-gradient(135deg, #E2852E 0%, #F5C857 100%)"
-              />
-              <ProjectCard
-                icon={HiSparkles}
-                title="AI Agents"
-                subtitle="Web"
-                description="Agents that earn the right to be called “smart”. No prompt-engineering PhD required."
-                gradient="linear-gradient(135deg, #ABE0F0 0%, #7BC8DA 100%)"
-              />
-              <ProjectCard
-                icon={IoGameController}
-                title="Games"
-                subtitle="Steam"
-                description="Boss fights and late-night “one more run”. Coming soon."
-                gradient="linear-gradient(135deg, #F5C857 0%, #FFEE91 100%)"
-              />
-            </SimpleGrid>
-          </VStack>
-        </Container>
-
-        {/* About Section */}
-        <Container maxW="5xl" py={{ base: 12, md: 20 }}>
-          <Box
-            bg="white"
-            rounded="3xl"
-            p={{ base: 8, md: 12 }}
-            shadow="xs"
-            borderWidth="1px"
-            borderColor="gray.100"
-            cursor="pointer"
-            onClick={() => setShowWebsite((prev) => !prev)}
-            role="button"
-            tabIndex={0}
-            aria-pressed={showWebsite}
-            aria-label="Toggle personal website"
-            perspective="1200px"
-          >
-            <Box
-              position="relative"
-              minH={{ base: "260px", md: "220px" }}
-              transformStyle="preserve-3d"
-              transition="transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1)"
-              transform={showWebsite ? "rotateY(180deg)" : "rotateY(0deg)"}
-            >
-              <Box position="absolute" inset="0" backfaceVisibility="hidden">
-                <VStack gap={6} align="start">
-                  <Heading
-                    fontSize={{ base: "2xl", md: "3xl" }}
-                    fontWeight="800"
-                    bgGradient="linear-gradient(to right, #E2852E, #F5C857)"
-                    bgClip="text"
-                  >
-                    Built after hours, launched before Monday.
-                  </Heading>
-                  <Stack
-                    gap={4}
-                    fontSize={{ base: "md", md: "lg" }}
-                    color="gray.700"
-                    lineHeight="1.8"
-                  >
-                    <Text>
-                      I’m Wayne Z—full-time engineer, overtime founder.
-                      TasteMates Labs is a one-person studio that treats nights
-                      and weekends like a launch window. Ship, learn, iterate,
-                      repeat.
-                    </Text>
-                    <Text>Check back; the changelog never sleeps.</Text>
-                  </Stack>
-                </VStack>
-              </Box>
-              <Box
-                position="absolute"
-                inset="0"
-                backfaceVisibility="hidden"
-                transform="rotateY(180deg)"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                bg="orange.50"
-                rounded="2xl"
-                borderWidth="1px"
-                borderColor="orange.100"
-              >
-                <VStack gap={3} textAlign="center">
-                  <Text
-                    fontSize="sm"
-                    color="orange.700"
-                    textTransform="uppercase"
-                    letterSpacing="0.08em"
-                    fontWeight="700"
-                  >
-                    Personal Website
-                  </Text>
-                  <Text
-                    fontSize={{ base: "2xl", md: "3xl" }}
-                    fontWeight="800"
-                    color="orange.900"
-                    fontFamily="'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
-                  >
-                    jwaynez.com
-                  </Text>
-                </VStack>
-              </Box>
-              <Box
-                position="absolute"
-                top={{ base: 4, md: 5 }}
-                right={{ base: 4, md: 5 }}
-                px={3}
-                py={1}
-                bg="orange.400"
-                color="white"
-                fontSize="xs"
-                fontWeight="700"
-                textTransform="uppercase"
-                letterSpacing="0.06em"
-                rounded="full"
-                shadow="md"
-                transform="rotate(3deg)"
-                backfaceVisibility="hidden"
-                animation="pulse 2.4s ease-in-out infinite"
-              >
-                Tap to flip
-              </Box>
-            </Box>
-          </Box>
-        </Container>
-
-        {/* Footer */}
-        <Box py={12} textAlign="center">
-          <Text color="gray.500" fontSize="sm">
-            © {new Date().getFullYear()} TasteMates Labs LLC. Created by Wayne
-            Z.
-          </Text>
-        </Box>
-      </Box>
-    </Box>
+    <header className="nav">
+      <div className="nav-inner">
+        <a className="nav-brand" href="#top" aria-label="TasteMates Labs home">
+          <img src="/images/logo.png" alt="TasteMates Labs" />
+        </a>
+        <div className="nav-right">
+          <nav aria-label="Primary">
+            <a href="#apps">Apps</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </nav>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
   );
 }
 
-export default App;
+function Hero() {
+  return (
+    <section className="hero" id="top" aria-labelledby="hero-title">
+      <img className="hero-logo" src="/images/logo.png" alt="TasteMates Labs" />
+      <h1 id="hero-title">
+        Software worth
+        <br />
+        opening twice.
+      </h1>
+      <p className="lede dark">
+        TasteMates Labs builds focused, private apps that are a pleasure to
+        come back to.
+      </p>
+      <div className="actions">
+        <a className="btn btn-dark" href="#apps">
+          See our apps
+        </a>
+        <a className="text-link" href="#contact">
+          Contact us
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function AppsGrid() {
+  return (
+    <section className="band band-mist" id="apps" aria-labelledby="apps-title">
+      <div className="wrap">
+        <h2 id="apps-title" className="section-title center">
+          Our apps.
+        </h2>
+        <ul className="apps-grid">
+          {PRODUCTS.map((p) =>
+            p.status === "in-development" ? (
+              <li className="app-card app-card-teaser" key={p.id}>
+                {/* No icon yet: a line symbol stands in for one. */}
+                <div className="teaser-tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    {p.glyph?.map((g) => (
+                      <path key={g.d} d={g.d} className={g.fill ? "filled" : undefined} />
+                    ))}
+                  </svg>
+                </div>
+                <h3>{p.name}</h3>
+                <p>{p.tagline}</p>
+                <span className="teaser-status">In development</span>
+              </li>
+            ) : (
+              <li className="app-card" key={p.id}>
+                <img className="app-card-icon" src={p.icon} alt="" width={72} height={72} />
+                <h3>{p.name}</h3>
+                <p>{p.tagline}</p>
+                <div className="app-card-actions">
+                  {p.stores.map((s) => (
+                    <StoreAction key={s.store} link={s} tone="dark" />
+                  ))}
+                </div>
+                {p.showcase ? (
+                  <a className="text-link" href={`#${p.id}`}>
+                    Learn more about {p.name}
+                  </a>
+                ) : null}
+              </li>
+            )
+          )}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function Showcase({ product }: { product: Product }) {
+  const { ref, visible } = useReveal<HTMLDivElement>();
+  const show = product.showcase!;
+  const [left, center, right] = show.shots;
+  return (
+    <>
+      <section
+        className="stage"
+        id={product.id}
+        aria-labelledby={`${product.id}-title`}
+        style={{ "--accent": product.accent } as CSSProperties}
+      >
+        <div className="stage-head">
+          <img className="app-icon" src={product.icon} alt="" width={96} height={96} />
+          <h2 id={`${product.id}-title`}>{product.name}</h2>
+          <p className="tagline">{product.tagline}</p>
+          <p className="lede">{product.summary}</p>
+          <div className="actions">
+            {product.stores.map((s) => (
+              <StoreAction key={s.store} link={s} tone="light" />
+            ))}
+          </div>
+        </div>
+
+        <div ref={ref} className={`phones ${visible ? "is-visible" : ""}`}>
+          <figure className="phone left">
+            <img src={left.src} alt={left.alt} loading="lazy" decoding="async" />
+          </figure>
+          <figure className="phone center">
+            <img src={center.src} alt={center.alt} loading="lazy" decoding="async" />
+          </figure>
+          <figure className="phone right">
+            <img src={right.src} alt={right.alt} loading="lazy" decoding="async" />
+          </figure>
+        </div>
+
+        <dl className="figures">
+          {show.figures.map((f) => (
+            <div key={f.label}>
+              <dt>{f.value}</dt>
+              <dd>{f.label}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="band band-mist" aria-labelledby={`${product.id}-features`}>
+        <div className="wrap">
+          <h2 id={`${product.id}-features`} className="section-title">
+            {show.featuresTitle}
+          </h2>
+          <div className="tiles">
+            {show.features.map((f) => (
+              <article className="tile" key={f.title}>
+                <div className="tile-text">
+                  <h3>{f.title}</h3>
+                  <p>{f.body}</p>
+                </div>
+                <div className="tile-shot">
+                  <img src={f.shot.src} alt={f.shot.alt} loading="lazy" decoding="async" />
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function Privacy() {
+  return (
+    <section className="band" aria-labelledby="privacy-title">
+      <div className="wrap narrow center">
+        <h2 id="privacy-title" className="section-title">
+          Private by design.
+        </h2>
+        <p className="lede dark">
+          Our apps work without an account and keep your data on your device.
+          We don't run ads, we don't track you, and we don't sell your data.
+        </p>
+        <ul className="promises">
+          <li>
+            <strong>No account</strong>
+            <span>Open the app and start.</span>
+          </li>
+          <li>
+            <strong>No tracking</strong>
+            <span>No analytics, no advertising ID.</span>
+          </li>
+          <li>
+            <strong>Your data stays yours</strong>
+            <span>Progress is stored on your device.</span>
+          </li>
+        </ul>
+        <p className="policy-links">
+          {RELEASED.map((p, i) => (
+            <span key={p.id}>
+              {i > 0 ? ", " : ""}
+              <a className="text-link" href={p.privacyUrl}>
+                {p.name} privacy policy
+              </a>
+            </span>
+          ))}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function About() {
+  return (
+    <section className="band band-mist" id="about" aria-labelledby="about-title">
+      <div className="wrap about">
+        <h2 id="about-title" className="section-title">
+          About
+          <br />
+          TasteMates Labs.
+        </h2>
+        <div className="about-body">
+          <p>
+            TasteMates Labs is a software company that designs and publishes
+            apps for learning and everyday life. We keep our catalog small so
+            that every app gets the attention it deserves: thoughtful design,
+            careful updates and real answers when you write to us.
+          </p>
+          <p>
+            Each app we publish follows the same principles. It does one job
+            well, it respects your privacy, and it works without asking you to
+            sign up.
+          </p>
+          <p className="muted">
+            TasteMates Labs LLC is a limited liability company registered in
+            Pennsylvania, United States.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Contact() {
+  return (
+    <section className="band" id="contact" aria-labelledby="contact-title">
+      <div className="wrap narrow center">
+        <h2 id="contact-title" className="section-title">
+          Get in touch.
+        </h2>
+        <p className="lede dark">
+          For app support, feedback and business inquiries, email us and we'll
+          get back to you.
+        </p>
+        <div className="actions">
+          <a className="btn btn-dark" href={`mailto:${SUPPORT_EMAIL}`}>
+            Email {SUPPORT_EMAIL}
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="wrap">
+        <div className="footer-cols">
+          <div>
+            <h3>Apps</h3>
+            <ul>
+              {RELEASED.map((p) => (
+                <li key={p.id}>
+                  <a href={p.showcase ? `#${p.id}` : "#apps"}>{p.name}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Legal</h3>
+            <ul>
+              {RELEASED.map((p) => (
+                <li key={p.id}>
+                  <a href={p.privacyUrl}>{p.name} Privacy Policy</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Company</h3>
+            <ul>
+              <li>
+                <a href="#about">About</a>
+              </li>
+              <li>
+                <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          Copyright © {new Date().getFullYear()} TasteMates Labs LLC. All rights reserved.
+        </p>
+        <p>Google Play is a trademark of Google LLC. App Store is a service mark of Apple Inc.</p>
+      </div>
+    </footer>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <a className="skip" href="#main">
+        Skip to content
+      </a>
+      <Nav />
+      <main id="main">
+        <Hero />
+        <AppsGrid />
+        {RELEASED.filter((p) => p.showcase).map((p) => (
+          <Showcase key={p.id} product={p} />
+        ))}
+        <Privacy />
+        <About />
+        <Contact />
+      </main>
+      <Footer />
+    </>
+  );
+}
