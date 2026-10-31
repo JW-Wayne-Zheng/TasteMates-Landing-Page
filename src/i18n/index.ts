@@ -7,11 +7,13 @@ import { ja } from "./ja";
 import { ko } from "./ko";
 import { ptBR } from "./pt-BR";
 import { zhHans } from "./zh-Hans";
+import { zhHant } from "./zh-Hant";
 
 /** Each code is also the page's `<html lang>`. Names are shown in their own language. */
 export const LANGUAGES = [
   { code: "en", name: "English", strings: en },
   { code: "zh-Hans", name: "简体中文", strings: zhHans },
+  { code: "zh-Hant", name: "繁體中文", strings: zhHant },
   { code: "ja", name: "日本語", strings: ja },
   { code: "ko", name: "한국어", strings: ko },
   { code: "es", name: "Español", strings: es },
@@ -39,6 +41,8 @@ export function readLang(): Lang {
   for (const tag of navigator.languages ?? []) {
     // Match on the base language, so es-MX reads Spanish and pt-PT reads Portuguese.
     const base = tag.toLowerCase().split("-")[0];
+    // Chinese is the exception: the script or region decides which one to read.
+    if (base === "zh") return /-(hant|tw|hk|mo)\b/i.test(tag) ? "zh-Hant" : "zh-Hans";
     const match = LANGUAGES.find((l) => l.code.toLowerCase().split("-")[0] === base);
     if (match) return match.code;
   }
