@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { PRODUCTS, RELEASED, STORE_LABEL, type Product, type StoreLink } from "./products";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { I18nContext, LANGUAGES, readLang, stringsFor, useI18n, type Lang } from "./i18n";
+import { useProducts, type Product, type StoreLink } from "./products";
 
 const SUPPORT_EMAIL = "support@tastematesapp.com";
 
@@ -28,11 +29,10 @@ function useReveal<T extends HTMLElement>() {
 
 /** A store badge-style link, or a plain note when the store isn't live yet. */
 function StoreAction({ link, tone }: { link: StoreLink; tone: "light" | "dark" }) {
-  const where = STORE_LABEL[link.store];
+  const { t } = useI18n();
   if ("comingSoon" in link) {
-    return <span className={`soon soon-${tone}`}>Coming soon to {where}</span>;
+    return <span className={`soon soon-${tone}`}>{t.store.comingSoon[link.store]}</span>;
   }
-  const verb = link.store === "app-store" ? "Download on" : "Get it on";
   return (
     <a
       className={`btn ${tone === "light" ? "btn-light" : "btn-dark"}`}
@@ -40,18 +40,13 @@ function StoreAction({ link, tone }: { link: StoreLink; tone: "light" | "dark" }
       target="_blank"
       rel="noopener noreferrer"
     >
-      {verb} {where}
+      {t.store.get[link.store]}
     </a>
   );
 }
 
 type ThemeChoice = "system" | "light" | "dark";
 const THEME_ORDER: ThemeChoice[] = ["system", "light", "dark"];
-const THEME_LABEL: Record<ThemeChoice, string> = {
-  system: "Appearance: match system",
-  light: "Appearance: light",
-  dark: "Appearance: dark",
-};
 
 function readTheme(): ThemeChoice {
   try {
@@ -67,6 +62,7 @@ function readTheme(): ThemeChoice {
  * what most visitors want; the other two are an explicit override.
  */
 function ThemeToggle() {
+  const { t } = useI18n();
   const [theme, setTheme] = useState<ThemeChoice>(readTheme);
 
   useEffect(() => {
@@ -87,8 +83,8 @@ function ThemeToggle() {
       type="button"
       className="theme-toggle"
       onClick={() => setTheme(next)}
-      aria-label={`${THEME_LABEL[theme]}. Switch to ${next}.`}
-      title={THEME_LABEL[theme]}
+      aria-label={`${t.theme.label[theme]}. ${t.theme.switchTo[next]}`}
+      title={t.theme.label[theme]}
     >
       {theme === "light" ? (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
@@ -109,45 +105,79 @@ function ThemeToggle() {
   );
 }
 
+/** A globe icon over a transparent native select, so every device gets its own picker. */
+function LanguagePicker() {
+  const { lang, setLang, t } = useI18n();
+  return (
+    <label className="lang-picker" title={t.nav.language}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.2 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.2-3.6-8.5s1.2-6.2 3.6-8.5Z" />
+      </svg>
+      <select
+        aria-label={t.nav.language}
+        value={lang}
+        onChange={(e) => setLang(e.target.value as Lang)}
+      >
+        {LANGUAGES.map((l) => (
+          <option key={l.code} value={l.code} lang={l.code}>
+            {l.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function Nav() {
+  const { t } = useI18n();
   return (
     <header className="nav">
       <div className="nav-inner">
-        <a className="nav-brand" href="#top" aria-label="TasteMates Labs home">
+        <a className="nav-brand" href="#top" aria-label={t.nav.home}>
           <img src="/images/logo.png" alt="TasteMates Labs" />
         </a>
         <div className="nav-right">
-          <nav aria-label="Primary">
-            <a href="#apps">Apps</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+          <nav aria-label={t.nav.primary}>
+            <a href="#apps">{t.nav.apps}</a>
+            <a href="#about">{t.nav.about}</a>
+            <a href="#contact">{t.nav.contact}</a>
           </nav>
-          <ThemeToggle />
+          <div className="nav-tools">
+            <LanguagePicker />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>
   );
 }
 
+/** Lines of a heading, each ending in a forced break except the last. */
+function Lines({ lines }: { lines: string[] }) {
+  return lines.map((line, i) => (
+    <span key={line}>
+      {i > 0 ? <br /> : null}
+      {line}
+    </span>
+  ));
+}
+
 function Hero() {
+  const { t } = useI18n();
   return (
     <section className="hero" id="top" aria-labelledby="hero-title">
       <img className="hero-logo" src="/images/logo.png" alt="TasteMates Labs" />
       <h1 id="hero-title">
-        Software worth
-        <br />
-        opening twice.
+        <Lines lines={t.hero.title} />
       </h1>
-      <p className="lede dark">
-        TasteMates Labs builds focused, private apps that are a pleasure to
-        come back to.
-      </p>
+      <p className="lede dark">{t.hero.lede}</p>
       <div className="actions">
         <a className="btn btn-dark" href="#apps">
-          See our apps
+          {t.hero.seeApps}
         </a>
         <a className="text-link" href="#contact">
-          Contact us
+          {t.hero.contact}
         </a>
       </div>
     </section>
@@ -155,14 +185,16 @@ function Hero() {
 }
 
 function AppsGrid() {
+  const { t } = useI18n();
+  const { products } = useProducts();
   return (
     <section className="band band-mist" id="apps" aria-labelledby="apps-title">
       <div className="wrap">
         <h2 id="apps-title" className="section-title center">
-          Our apps.
+          {t.apps.title}
         </h2>
         <ul className="apps-grid">
-          {PRODUCTS.map((p) =>
+          {products.map((p) =>
             p.status === "in-development" ? (
               <li className="app-card app-card-teaser" key={p.id}>
                 {/* No icon yet: a line symbol stands in for one. */}
@@ -175,7 +207,7 @@ function AppsGrid() {
                 </div>
                 <h3>{p.name}</h3>
                 <p>{p.tagline}</p>
-                <span className="teaser-status">In development</span>
+                <span className="teaser-status">{t.apps.inDevelopment}</span>
               </li>
             ) : (
               <li className="app-card" key={p.id}>
@@ -189,7 +221,7 @@ function AppsGrid() {
                 </div>
                 {p.showcase ? (
                   <a className="text-link" href={`#${p.id}`}>
-                    Learn more about {p.name}
+                    {t.apps.learnMore(p.name)}
                   </a>
                 ) : null}
               </li>
@@ -223,6 +255,7 @@ function Showcase({ product }: { product: Product }) {
               <StoreAction key={s.store} link={s} tone="light" />
             ))}
           </div>
+          {product.languageNote ? <p className="language-note">{product.languageNote}</p> : null}
         </div>
 
         <div ref={ref} className={`phones ${visible ? "is-visible" : ""}`}>
@@ -272,36 +305,29 @@ function Showcase({ product }: { product: Product }) {
 }
 
 function Privacy() {
+  const { t } = useI18n();
+  const { released } = useProducts();
   return (
     <section className="band" aria-labelledby="privacy-title">
       <div className="wrap narrow center">
         <h2 id="privacy-title" className="section-title">
-          Private by design.
+          {t.privacy.title}
         </h2>
-        <p className="lede dark">
-          Our apps work without an account and keep your data on your device.
-          We don't run ads, we don't track you, and we don't sell your data.
-        </p>
+        <p className="lede dark">{t.privacy.lede}</p>
         <ul className="promises">
-          <li>
-            <strong>No account</strong>
-            <span>Open the app and start.</span>
-          </li>
-          <li>
-            <strong>No tracking</strong>
-            <span>No analytics, no advertising ID.</span>
-          </li>
-          <li>
-            <strong>Your data stays yours</strong>
-            <span>Progress is stored on your device.</span>
-          </li>
+          {t.privacy.promises.map((promise) => (
+            <li key={promise.title}>
+              <strong>{promise.title}</strong>
+              <span>{promise.body}</span>
+            </li>
+          ))}
         </ul>
         <p className="policy-links">
-          {RELEASED.map((p, i) => (
+          {released.map((p, i) => (
             <span key={p.id}>
               {i > 0 ? ", " : ""}
               <a className="text-link" href={p.privacyUrl}>
-                {p.name} privacy policy
+                {t.privacy.policyLink(p.name)}
               </a>
             </span>
           ))}
@@ -312,30 +338,18 @@ function Privacy() {
 }
 
 function About() {
+  const { t } = useI18n();
   return (
     <section className="band band-mist" id="about" aria-labelledby="about-title">
       <div className="wrap about">
         <h2 id="about-title" className="section-title">
-          About
-          <br />
-          TasteMates Labs.
+          <Lines lines={t.about.title} />
         </h2>
         <div className="about-body">
-          <p>
-            TasteMates Labs is a software company that designs and publishes
-            apps for learning and everyday life. We keep our catalog small so
-            that every app gets the attention it deserves: thoughtful design,
-            careful updates and real answers when you write to us.
-          </p>
-          <p>
-            Each app we publish follows the same principles. It does one job
-            well, it respects your privacy, and it works without asking you to
-            sign up.
-          </p>
-          <p className="muted">
-            TasteMates Labs LLC is a limited liability company registered in
-            Pennsylvania, United States.
-          </p>
+          {t.about.body.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+          <p className="muted">{t.about.legal}</p>
         </div>
       </div>
     </section>
@@ -343,19 +357,17 @@ function About() {
 }
 
 function Contact() {
+  const { t } = useI18n();
   return (
     <section className="band" id="contact" aria-labelledby="contact-title">
       <div className="wrap narrow center">
         <h2 id="contact-title" className="section-title">
-          Get in touch.
+          {t.contact.title}
         </h2>
-        <p className="lede dark">
-          For app support, feedback and business inquiries, email us and we'll
-          get back to you.
-        </p>
+        <p className="lede dark">{t.contact.lede}</p>
         <div className="actions">
           <a className="btn btn-dark" href={`mailto:${SUPPORT_EMAIL}`}>
-            Email {SUPPORT_EMAIL}
+            {t.contact.email(SUPPORT_EMAIL)}
           </a>
         </div>
       </div>
@@ -364,14 +376,16 @@ function Contact() {
 }
 
 function Footer() {
+  const { t } = useI18n();
+  const { released } = useProducts();
   return (
     <footer className="footer">
       <div className="wrap">
         <div className="footer-cols">
           <div>
-            <h3>Apps</h3>
+            <h3>{t.footer.apps}</h3>
             <ul>
-              {RELEASED.map((p) => (
+              {released.map((p) => (
                 <li key={p.id}>
                   <a href={p.showcase ? `#${p.id}` : "#apps"}>{p.name}</a>
                 </li>
@@ -379,54 +393,84 @@ function Footer() {
             </ul>
           </div>
           <div>
-            <h3>Legal</h3>
+            <h3>{t.footer.legal}</h3>
             <ul>
-              {RELEASED.map((p) => (
+              {released.map((p) => (
                 <li key={p.id}>
-                  <a href={p.privacyUrl}>{p.name} Privacy Policy</a>
+                  <a href={p.privacyUrl}>{t.footer.policyLink(p.name)}</a>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h3>Company</h3>
+            <h3>{t.footer.company}</h3>
             <ul>
               <li>
-                <a href="#about">About</a>
+                <a href="#about">{t.footer.about}</a>
               </li>
               <li>
-                <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a>
+                <a href={`mailto:${SUPPORT_EMAIL}`}>{t.footer.contact}</a>
               </li>
             </ul>
           </div>
         </div>
-        <p>
-          Copyright © {new Date().getFullYear()} TasteMates Labs LLC. All rights reserved.
-        </p>
-        <p>Google Play is a trademark of Google LLC. App Store is a service mark of Apple Inc.</p>
+        <p>{t.footer.copyright(new Date().getFullYear())}</p>
+        <p>{t.footer.trademarks}</p>
       </div>
     </footer>
   );
 }
 
-export default function App() {
+function Page() {
+  const { t } = useI18n();
+  const { released } = useProducts();
   return (
     <>
       <a className="skip" href="#main">
-        Skip to content
+        {t.skip}
       </a>
       <Nav />
       <main id="main">
         <Hero />
         <AppsGrid />
-        {RELEASED.filter((p) => p.showcase).map((p) => (
-          <Showcase key={p.id} product={p} />
-        ))}
+        {released
+          .filter((p) => p.showcase)
+          .map((p) => (
+            <Showcase key={p.id} product={p} />
+          ))}
         <Privacy />
         <About />
         <Contact />
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function App() {
+  const [lang, setLangState] = useState<Lang>(readLang);
+  const i18n = useMemo(() => {
+    const setLang = (next: Lang) => {
+      setLangState(next);
+      try {
+        localStorage.setItem("lang", next);
+      } catch {
+        // Storage can be blocked (private mode); the choice then lasts this visit.
+      }
+    };
+    return { lang, setLang, t: stringsFor(lang) };
+  }, [lang]);
+
+  // Before paint, so the first frame already uses this language's fonts.
+  useLayoutEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = i18n.t.meta.title;
+    document.querySelector('meta[name="description"]')?.setAttribute("content", i18n.t.meta.description);
+  }, [lang, i18n.t]);
+
+  return (
+    <I18nContext.Provider value={i18n}>
+      <Page />
+    </I18nContext.Provider>
   );
 }

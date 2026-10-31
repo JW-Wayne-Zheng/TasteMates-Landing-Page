@@ -120,6 +120,43 @@ a {
   top: 8px;
 }
 
+/* ---------- languages ---------- */
+
+/* The right Han glyphs for each language need its own fonts named first. */
+:lang(zh-Hans) {
+  --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+}
+:lang(ja) {
+  --font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic",
+    Meiryo, "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+}
+:lang(ko) {
+  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
+}
+/* Tight tracking suits Latin display type; it crowds CJK characters. */
+:is(:lang(zh-Hans), :lang(ja), :lang(ko)) * {
+  letter-spacing: 0 !important;
+}
+/* Korean breaks between words, Japanese between phrases, not inside them. */
+:lang(ko) {
+  word-break: keep-all;
+}
+:lang(ja) {
+  word-break: auto-phrase;
+}
+.lede {
+  text-wrap: pretty;
+}
+/* Long German and French words must not push a heading off a phone screen. */
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
 /* ---------- navigation ---------- */
 
 .nav {
@@ -153,6 +190,7 @@ a {
   gap: 28px;
 }
 .nav nav a {
+  white-space: nowrap;
   font-size: 13px;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -168,7 +206,13 @@ a {
   align-items: center;
   gap: 18px;
 }
-.theme-toggle {
+.nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.theme-toggle,
+.lang-picker {
   display: grid;
   place-items: center;
   width: 32px;
@@ -181,13 +225,31 @@ a {
   opacity: 0.8;
   cursor: pointer;
 }
-.theme-toggle:hover {
+.theme-toggle:hover,
+.lang-picker:hover {
   opacity: 1;
   background: var(--nav-line);
 }
-.theme-toggle svg {
+.theme-toggle svg,
+.lang-picker svg {
   width: 17px;
   height: 17px;
+}
+.lang-picker {
+  position: relative;
+}
+.lang-picker:focus-within {
+  outline: 2px solid #0071e3;
+  outline-offset: 3px;
+}
+.lang-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 /* ---------- shared type ---------- */
@@ -245,9 +307,10 @@ a {
 .btn-dark:hover {
   background: var(--btn-hover);
 }
+/* Sits on the always-black stage, so its colours ignore the theme. */
 .btn-light {
   background: #fff;
-  color: var(--ink);
+  color: #1d1d1f;
 }
 .btn-light:hover {
   background: #e8e8ed;
@@ -290,6 +353,11 @@ a {
   font-weight: 700;
   letter-spacing: -0.03em;
 }
+/* Translated headlines run longer than the English, or use wider characters. */
+.hero h1:not(:lang(en)) {
+  font-size: clamp(36px, 8.5vw, 88px);
+  line-height: 1.08;
+}
 
 /* ---------- Dev Path stage (the one bold moment) ---------- */
 
@@ -331,6 +399,11 @@ a {
   margin-left: auto;
   margin-right: auto;
   text-wrap: balance;
+}
+.language-note {
+  margin: 20px 0 0;
+  font-size: 15px;
+  color: var(--stage-muted);
 }
 .soon {
   font-size: 17px;
@@ -624,6 +697,9 @@ a {
   .nav nav {
     gap: 18px;
   }
+  .nav-right {
+    gap: 8px;
+  }
   .tiles,
   .about,
   .promises,
@@ -646,6 +722,22 @@ a {
   }
   .phones.is-visible .phone.right {
     transform: translateX(18%) rotate(6deg);
+  }
+}
+
+/* Room for the longest translated nav labels beside the logo and tools. */
+@media (max-width: 480px) {
+  .nav-inner {
+    padding: 0 12px;
+  }
+  .nav-brand img {
+    height: 26px;
+  }
+  .nav nav {
+    gap: 12px;
+  }
+  .nav-tools {
+    gap: 0;
   }
 }
 
