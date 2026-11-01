@@ -42,6 +42,8 @@ export type Product = {
   summary?: string;
   /** Says the app is English-only, on pages in other languages. */
   languageNote?: string;
+  /** This app's own privacy promises, under its figures. */
+  privacyNote?: string;
   /** Omitted while in development; the card shows `glyph` instead. */
   icon?: string;
   glyph?: Glyph;
@@ -69,6 +71,7 @@ function buildProducts(copy: Strings["products"]): Product[] {
       tagline: dev.tagline,
       summary: dev.summary,
       languageNote: dev.languageNote,
+      privacyNote: dev.privacyNote,
       icon: "/dev-path/icon.png",
       accent: "#2bb592",
       stores: [

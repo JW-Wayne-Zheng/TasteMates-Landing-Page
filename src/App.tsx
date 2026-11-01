@@ -355,6 +355,7 @@ function Showcase({ product }: { product: Product }) {
             </div>
           ))}
         </dl>
+        {product.privacyNote ? <p className="stage-privacy">{product.privacyNote}</p> : null}
       </section>
 
       <section className="band band-mist" aria-labelledby={`${product.id}-features`}>

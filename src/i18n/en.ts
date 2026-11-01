@@ -55,11 +55,11 @@ export const en = {
   },
   privacy: {
     title: "Private by design.",
-    lede: "Our apps work without an account and keep your data on your device. We don't run ads, we don't track you, and we don't sell your data.",
+    lede: "We collect only what an app needs to work, and we don't sell your data. Each app's privacy policy spells out what it stores and why.",
     promises: [
-      { title: "No account", body: "Open the app and start." },
-      { title: "No tracking", body: "No analytics, no advertising ID." },
-      { title: "Your data stays yours", body: "Progress is stored on your device." },
+      { title: "Only what's needed", body: "Each app collects only what it needs to work." },
+      { title: "Never sold", body: "We don't sell your data." },
+      { title: "Clear policies", body: "Each app's privacy policy says what it stores and why." },
     ],
     policyLink: (name: string) => `${name} privacy policy`,
   },
@@ -67,7 +67,7 @@ export const en = {
     title: ["About", "TasteMates Labs."],
     body: [
       "TasteMates Labs is a software company that designs and publishes apps for learning and everyday life. We keep our catalog small so that every app gets the attention it deserves: thoughtful design, careful updates and real answers when you write to us.",
-      "Each app we publish follows the same principles. It does one job well, it respects your privacy, and it works without asking you to sign up.",
+      "Each app we publish follows the same principles. It does one job well, it respects your privacy, and it asks only for what it needs.",
     ],
     legal: "TasteMates Labs LLC is a limited liability company registered in Pennsylvania, United States.",
   },
@@ -93,6 +93,7 @@ export const en = {
         "From a student's first technical interview to the staff-level design round. Concepts, coding patterns and worked questions, each taken one level deeper than most prep material goes.",
       // Empty in English: the note only tells other readers the app is in English.
       languageNote: "",
+      privacyNote: "Dev Path has no account, no ads and no tracking. Your progress stays on your device.",
       shots: {
         trace: "Dev Path tracing a binary search step by step",
         home: "The Dev Path home screen with the career path and technical library",

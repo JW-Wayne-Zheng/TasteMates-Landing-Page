@@ -50,11 +50,11 @@ export const fr: Strings = {
   },
   privacy: {
     title: "Privées dès la conception.",
-    lede: "Nos applis fonctionnent sans compte et conservent vos données sur votre appareil. Nous n'affichons pas de publicité, nous ne vous pistons pas et nous ne vendons pas vos données.",
+    lede: "Nous ne collectons que ce dont une appli a besoin pour fonctionner, et nous ne vendons pas vos données. La politique de confidentialité de chaque appli précise ce qu'elle stocke et pourquoi.",
     promises: [
-      { title: "Sans compte", body: "Ouvrez l'appli et commencez." },
-      { title: "Sans pistage", body: "Aucune analyse d'audience, aucun identifiant publicitaire." },
-      { title: "Vos données restent à vous", body: "Votre progression est stockée sur votre appareil." },
+      { title: "Le strict nécessaire", body: "Chaque appli ne collecte que ce dont elle a besoin pour fonctionner." },
+      { title: "Jamais vendues", body: "Nous ne vendons pas vos données." },
+      { title: "Des politiques claires", body: "La politique de confidentialité de chaque appli précise ce qu'elle stocke et pourquoi." },
     ],
     policyLink: (name) => `Politique de confidentialité de ${name} (en anglais)`,
   },
@@ -62,7 +62,7 @@ export const fr: Strings = {
     title: ["À propos de", "TasteMates Labs."],
     body: [
       "TasteMates Labs est une société de logiciels qui conçoit et publie des applis pour apprendre et pour le quotidien. Notre catalogue reste volontairement restreint afin que chaque appli reçoive l'attention qu'elle mérite : un design réfléchi, des mises à jour soignées et de vraies réponses quand vous nous écrivez.",
-      "Chaque appli que nous publions suit les mêmes principes : elle fait bien une seule chose, respecte votre vie privée et fonctionne sans vous demander de vous inscrire.",
+      "Chaque appli que nous publions suit les mêmes principes : elle fait bien une seule chose, respecte votre vie privée et ne demande que ce dont elle a besoin.",
     ],
     legal: "TasteMates Labs LLC est une société à responsabilité limitée enregistrée en Pennsylvanie, aux États-Unis.",
   },
@@ -87,6 +87,7 @@ export const fr: Strings = {
       summary:
         "Du premier entretien technique d'un étudiant à l'épreuve de conception de niveau staff. Concepts, schémas de programmation et questions corrigées, chacun poussé un cran plus loin que la plupart des supports de préparation.",
       languageNote: "Dev Path est pour l'instant disponible uniquement en anglais.",
+      privacyNote: "Dev Path fonctionne sans compte, sans publicité et sans pistage. Votre progression reste sur votre appareil.",
       shots: {
         trace: "Dev Path déroulant une recherche dichotomique étape par étape",
         home: "L'écran d'accueil de Dev Path avec le parcours de carrière et la bibliothèque technique",

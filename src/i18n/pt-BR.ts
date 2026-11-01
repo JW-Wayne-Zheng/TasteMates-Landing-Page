@@ -50,11 +50,11 @@ export const ptBR: Strings = {
   },
   privacy: {
     title: "Privados desde a concepção.",
-    lede: "Nossos apps funcionam sem conta e mantêm seus dados no seu dispositivo. Não exibimos anúncios, não rastreamos você e não vendemos seus dados.",
+    lede: "Coletamos apenas o que um app precisa para funcionar e não vendemos seus dados. A política de privacidade de cada app explica o que ele armazena e por quê.",
     promises: [
-      { title: "Sem conta", body: "Abra o app e comece." },
-      { title: "Sem rastreamento", body: "Sem análises, sem ID de publicidade." },
-      { title: "Seus dados são seus", body: "Seu progresso fica salvo no seu dispositivo." },
+      { title: "Só o necessário", body: "Cada app coleta apenas o que precisa para funcionar." },
+      { title: "Nunca vendidos", body: "Não vendemos seus dados." },
+      { title: "Políticas claras", body: "A política de privacidade de cada app explica o que ele armazena e por quê." },
     ],
     policyLink: (name) => `Política de privacidade do ${name} (em inglês)`,
   },
@@ -62,7 +62,7 @@ export const ptBR: Strings = {
     title: ["Sobre a", "TasteMates Labs."],
     body: [
       "A TasteMates Labs é uma empresa de software que projeta e publica apps para aprender e para o dia a dia. Mantemos um catálogo pequeno para que cada app receba a atenção que merece: design cuidadoso, atualizações criteriosas e respostas de verdade quando você nos escreve.",
-      "Todos os apps que publicamos seguem os mesmos princípios: fazem uma coisa bem-feita, respeitam sua privacidade e funcionam sem pedir cadastro.",
+      "Todos os apps que publicamos seguem os mesmos princípios: fazem uma coisa bem-feita, respeitam sua privacidade e pedem apenas o que precisam.",
     ],
     legal: "A TasteMates Labs LLC é uma sociedade de responsabilidade limitada registrada na Pensilvânia, Estados Unidos.",
   },
@@ -87,6 +87,7 @@ export const ptBR: Strings = {
       summary:
         "Da primeira entrevista técnica de um estudante à rodada de design de nível staff. Conceitos, padrões de programação e questões resolvidas, cada um com um nível a mais de profundidade do que a maioria dos materiais de preparação.",
       languageNote: "No momento, o Dev Path está disponível apenas em inglês.",
+      privacyNote: "O Dev Path não tem conta, anúncios nem rastreamento. Seu progresso fica no seu dispositivo.",
       shots: {
         trace: "O Dev Path acompanhando uma busca binária passo a passo",
         home: "A tela inicial do Dev Path com a trilha de carreira e a biblioteca técnica",

@@ -50,11 +50,11 @@ export const es: Strings = {
   },
   privacy: {
     title: "Privadas desde el diseño.",
-    lede: "Nuestras apps funcionan sin cuenta y guardan tus datos en tu dispositivo. No mostramos anuncios, no te rastreamos y no vendemos tus datos.",
+    lede: "Solo recopilamos lo que una app necesita para funcionar y no vendemos tus datos. La política de privacidad de cada app explica qué guarda y por qué.",
     promises: [
-      { title: "Sin cuenta", body: "Abre la app y empieza." },
-      { title: "Sin rastreo", body: "Sin analíticas ni ID de publicidad." },
-      { title: "Tus datos son tuyos", body: "Tu progreso se guarda en tu dispositivo." },
+      { title: "Solo lo necesario", body: "Cada app recopila únicamente lo que necesita para funcionar." },
+      { title: "Nunca a la venta", body: "No vendemos tus datos." },
+      { title: "Políticas claras", body: "La política de privacidad de cada app explica qué guarda y por qué." },
     ],
     policyLink: (name) => `Política de privacidad de ${name} (en inglés)`,
   },
@@ -62,7 +62,7 @@ export const es: Strings = {
     title: ["Acerca de", "TasteMates Labs."],
     body: [
       "TasteMates Labs es una empresa de software que diseña y publica apps para aprender y para el día a día. Mantenemos un catálogo reducido para que cada app reciba la atención que merece: un diseño cuidado, actualizaciones meditadas y respuestas de verdad cuando nos escribes.",
-      "Todas las apps que publicamos siguen los mismos principios: hacen bien una sola cosa, respetan tu privacidad y funcionan sin pedirte que te registres.",
+      "Todas las apps que publicamos siguen los mismos principios: hacen bien una sola cosa, respetan tu privacidad y solo piden lo que necesitan.",
     ],
     legal: "TasteMates Labs LLC es una sociedad de responsabilidad limitada registrada en Pensilvania, Estados Unidos.",
   },
@@ -87,6 +87,7 @@ export const es: Strings = {
       summary:
         "Desde la primera entrevista técnica de un estudiante hasta la ronda de diseño de nivel staff. Conceptos, patrones de programación y preguntas resueltas, cada uno un nivel más a fondo que la mayoría del material de preparación.",
       languageNote: "Dev Path está disponible por ahora solo en inglés.",
+      privacyNote: "Dev Path no tiene cuentas, anuncios ni rastreo. Tu progreso se queda en tu dispositivo.",
       shots: {
         trace: "Dev Path siguiendo una búsqueda binaria paso a paso",
         home: "La pantalla de inicio de Dev Path con la trayectoria profesional y la biblioteca técnica",

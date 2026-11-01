@@ -572,6 +572,13 @@ h3 {
   color: var(--stage-muted);
 }
 
+.stage-privacy {
+  margin: 56px auto 0;
+  max-width: 34em;
+  color: var(--stage-muted);
+  text-wrap: pretty;
+}
+
 /* ---------- apps grid ---------- */
 
 /* Columns are capped, so one app sits centred and more apps fill the row. */
